@@ -1,0 +1,45 @@
+{
+  "name": "websocket-monitor",
+  "version": "1.0.0",
+  "description": "A library to monitor network drops",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ankurnarkhede/websocket-monitor.git"
+  },
+  "keywords": [
+    "network",
+    "packet",
+    "drops",
+    "network",
+    "glitch",
+    "websocket",
+    "websockets",
+    "http",
+    "ws"
+  ],
+  "author": "Ankur Narkhede",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ankurnarkhede/websocket-monitor/issues"
+  },
+  "devDependencies": {
+    "eslint": "^8.26.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard-with-typescript": "^23.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.3.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-security": "^1.5.0",
+    "nodemon": "^2.0.20",
+    "prettier": "^2.7.1"
+  },
+  "homepage": "https://github.com/ankurnarkhede/websocket-monitor#readme",
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}
