@@ -5,28 +5,52 @@ class WebSocketMonitor {
   constructor(options) {
     this.websocketUrl = options.websocketUrl || "wss://echo.websocket.org";
     this.pingInterval = options.pingInterval || 10000;
-    this.retry = options.retry || false;
+    this.retry = options.retry !== false;
     this.retryTimeout = options.retryTimeout || 30000;
     this.retryAttempts = options.retryAttempts || -1;
     this.retryCount = 0;
     this.errorTimestamps = [];
+    this.connectionActive = true;
 
     this.connect();
+
+    // Register exit, SIGINT, and SIGTERM event handlers
+    process.on("exit", () => {
+      if (this.connectionActive) {
+        this.close();
+      }
+    });
+
+    process.on("SIGINT", () => {
+      console.log("Received SIGINT. Closing WebSocketMonitor.");
+      this.close();
+      process.exit(0);
+    });
+
+    process.on("SIGTERM", () => {
+      console.log("Received SIGTERM. Closing WebSocketMonitor.");
+      this.close();
+      process.exit(0);
+    });
+  }
+
+  log(...args) {
+    const timestamp = new Date().toISOString();
+    console.log(`${timestamp}:`, ...args);
   }
 
   connect() {
     this.ws = new WebSocket(this.websocketUrl);
 
     this.ws.on("open", () => {
-      console.log("WebSocket connection opened");
-      this.sendPing();
+      this.log("WebSocket connection opened");
       this.setupPingInterval();
     });
 
     this.ws.on("message", (message, isBinary) => {
-      console.log("received: %s", message);
+      this.log(`message received: ${message}`);
       if (message.toString() === "ping") {
-        this.sendPing();
+        this.setupPingInterval();
       }
     });
 
@@ -40,9 +64,8 @@ class WebSocketMonitor {
     });
 
     this.ws.on("close", (code, reason) => {
-      console.log(
-        `WebSocket connection closed, code=${code}, reason=${reason}`
-      );
+      this.log(`WebSocket connection closed, code=${code}, reason=${reason}`);
+      this.clearPingInterval();
     });
   }
 
@@ -56,13 +79,17 @@ class WebSocketMonitor {
     }, this.pingInterval);
   }
 
+  clearPingInterval() {
+    clearInterval(this.pingIntervalId);
+  }
+
   retryConnection() {
     if (this.retryAttempts === -1 || this.retryCount < this.retryAttempts) {
       this.retryCount++;
-      console.log(
+      this.log(
         `Retrying connection (${this.retryCount}/${this.retryAttempts})...`
       );
-      clearInterval(this.pingIntervalId);
+      this.clearPingInterval();
       setTimeout(() => {
         this.connect();
       }, this.retryTimeout);
@@ -75,12 +102,13 @@ class WebSocketMonitor {
   }
 
   close() {
-    clearInterval(this.pingIntervalId);
+    this.clearPingInterval();
     this.ws.close();
-    console.log(
-      "WebSocket connection closed. No network glitches during the process."
+    this.connectionActive = false;
+    this.log(
+      "WebSocket connection closed. Error timestamps: ",
+      this.errorTimestamps.join(", ")
     );
-    console.log("Error timestamps:", this.errorTimestamps.join(", "));
   }
 }
 
