@@ -6,7 +6,6 @@ class WebSocketMonitor {
     this.websocketUrl = options.websocketUrl || "wss://echo.websocket.org";
     this.pingInterval = options.pingInterval || 10000;
     this.retry = options.retry !== false;
-    this.retryTimeout = options.retryTimeout || 30000;
     this.retryAttempts = options.retryAttempts || -1;
     this.retryCount = 0;
     this.errorTimestamps = [];
@@ -90,9 +89,7 @@ class WebSocketMonitor {
         `Retrying connection (${this.retryCount}/${this.retryAttempts})...`
       );
       this.clearPingInterval();
-      setTimeout(() => {
-        this.connect();
-      }, this.retryTimeout);
+      this.connect();
     } else {
       console.error(
         "Retry attempts exhausted. Unable to establish WebSocket connection."
