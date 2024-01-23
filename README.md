@@ -16,13 +16,7 @@ npm install github:ankurnarkhede/websocket-monitor
 const WebSocketMonitor = require('websocket-monitor');
 
 // Create an instance of WebSocketMonitor with your desired configuration
-const monitor = new WebSocketMonitor({
-  websocketUrl: 'wss://echo.websocket.org',
-  pingInterval: 10000,
-  retry: true,
-  retryAttempts: 3, // Set to -1 for unlimited retries
-});
-
+const monitor = new WebSocketMonitor();
 
 // Closing the WebSocketMonitor
 process.on('SIGINT', () => {
@@ -35,5 +29,6 @@ process.on('SIGINT', () => {
 ## Confguration Options
 - `websocketUrl`: The WebSocket URL to connect to (default: 'wss://echo.websocket.org').
 - `pingInterval`: The interval (in milliseconds) for sending "ping" messages (default: 10000).
-- `retry`: Whether to retry the WebSocket connection on failure (default: true).
-- `retryAttempts`: The number of retry attempts before giving up (-1 for unlimited retries, default: -1).
+- `retry`: Whether to retry the WebSocket connection on failure (default: true). The process will stop of first failure if this flag is set as `false`.
+- `retryAttempts`: The number of retry attempts before giving stopping the process (-1 for unlimited retries, default: -1).
+- `debug`: Set to `true` for getting the debug logs.

@@ -10,6 +10,7 @@ class WebSocketMonitor {
     this.retryCount = 0;
     this.errorTimestamps = [];
     this.connectionActive = true;
+    this.debug = options.debug === true;
 
     this.connect();
 
@@ -34,8 +35,10 @@ class WebSocketMonitor {
   }
 
   log(...args) {
-    const timestamp = new Date().toISOString();
-    console.log(`${timestamp}:`, ...args);
+    if (this.debug) {
+      const timestamp = new Date().toISOString();
+      console.log(`${timestamp}:`, ...args);
+    }
   }
 
   connect() {
@@ -103,8 +106,10 @@ class WebSocketMonitor {
     this.clearPingInterval();
     this.ws.close();
     this.connectionActive = false;
-    this.log(
-      "WebSocket connection closed. Error timestamps: ",
+
+    // Log here with console.log() as we want this to get logged everytime
+    console.log(
+      "WebSocketMonitor closed. Error timestamps: ",
       this.errorTimestamps.join(", ")
     );
   }
