@@ -48,9 +48,6 @@ class WebSocketMonitor {
 
     this.ws.on("message", (message, isBinary) => {
       this.log(`message received: ${message}`);
-      if (message.toString() === "ping") {
-        this.setupPingInterval();
-      }
     });
 
     this.ws.on("error", (error) => {
@@ -64,7 +61,11 @@ class WebSocketMonitor {
 
     this.ws.on("close", (code, reason) => {
       this.log(`WebSocket connection closed, code=${code}, reason=${reason}`);
+      this.errorTimestamps.push(new Date().toISOString());
       this.clearPingInterval();
+      if (this.retry) {
+        this.retryConnection();
+      }
     });
   }
 
