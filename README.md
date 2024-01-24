@@ -18,14 +18,21 @@ const WebSocketMonitor = require('websocket-monitor');
 // Create an instance of WebSocketMonitor with your desired configuration
 const webSocketMonitor = new WebSocketMonitor();
 
-/*
-  Perform your task. Close the webSocketMonitor after your task is completed.
-*/
-
-// Closing the WebSocketMonitor
 (async () => {
+  /*
+    Perform your task. Close the webSocketMonitor after your task is completed.
+  */
+
+  // Closing the WebSocketMonitor
   await webSocketMonitor.close();
-})()
+});
+
+```
+
+#### Closing the WebSocket Monitor
+The instance of WebSocket Monitor can be closed with the `close()` method as shown below.
+```js
+await webSocketMonitor.close();
 ```
 
 ## Confguration Options

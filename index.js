@@ -12,6 +12,7 @@ class WebSocketMonitor {
     this.connectionActive = true;
     this.closeCommandReceived = false;
     this.debug = options.debug === true;
+    this.websocketSuccessCodes = options.websocketSuccessCodes || [1000, 1005];
 
     this.connect();
 
@@ -61,10 +62,14 @@ class WebSocketMonitor {
 
     this.ws.on("close", (code, reason) => {
       this.log(`WebSocket connection closed, code=${code}, reason=${reason}`);
-      this.errorTimestamps.push(new Date().toISOString());
-      this.clearPingInterval();
-      if (this.retry) {
-        this.retryConnection();
+
+      // Store the timestamp and retry the connection if this is an abnormal close event
+      if (this.websocketSuccessCodes.includes(code)) {
+        this.errorTimestamps.push(new Date().toISOString());
+        this.clearPingInterval();
+        if (this.retry) {
+          this.retryConnection();
+        }
       }
     });
   }
@@ -95,7 +100,9 @@ class WebSocketMonitor {
       this.clearPingInterval();
       this.connect();
     } else {
-      if (this.retryAttempts === -1 || this.retryCount < this.retryAttempts) {
+      if (
+        !(this.retryAttempts === -1 || this.retryCount < this.retryAttempts)
+      ) {
         console.error(
           "Retry attempts exhausted. Unable to establish WebSocket connection."
         );
@@ -107,16 +114,20 @@ class WebSocketMonitor {
   async close() {
     // Set closeCommandReceived = true so that any disconnection in the sleep time doesn't reconnect the WS connection.
     this.closeCommandReceived = true;
-    await sleep(1000);
+    await sleep(5000);
     this.clearPingInterval();
     this.ws.close();
     this.connectionActive = false;
 
     // Log here with console.log() as we want this to get logged everytime
-    console.log(
-      "WebSocketMonitor closed. Error timestamps: ",
-      this.errorTimestamps.join(", ")
-    );
+    if (this.errorTimestamps.length) {
+      console.error(
+        "WebSocketMonitor closed. Error timestamps: ",
+        this.errorTimestamps.join(", ")
+      );
+    } else {
+      console.info("WebSocketMonitor closed. No network drops observed");
+    }
   }
 }
 
