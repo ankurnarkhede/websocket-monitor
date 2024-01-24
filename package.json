@@ -1,6 +1,6 @@
 {
   "name": "websocket-monitor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A library to monitor network drops",
   "main": "index.js",
   "scripts": {

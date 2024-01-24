@@ -2,7 +2,7 @@
 const WebSocket = require("ws");
 
 class WebSocketMonitor {
-  constructor(options) {
+  constructor(options = {}) {
     this.websocketUrl = options.websocketUrl || "wss://echo.websocket.org";
     this.pingInterval = options.pingInterval || 10000;
     this.retry = options.retry !== false;
