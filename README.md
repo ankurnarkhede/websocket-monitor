@@ -7,7 +7,7 @@ WebSocket Monitor is a Node.js library designed for monitoring network drops whi
 You can install the library using npm with the following command:
 
 ```bash
-npm install github:ankurnarkhede/websocket-monitor
+npm install websocket-monitor
 ```
 ## Usage
 
