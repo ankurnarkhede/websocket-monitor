@@ -16,14 +16,16 @@ npm install websocket-monitor
 const WebSocketMonitor = require('websocket-monitor');
 
 // Create an instance of WebSocketMonitor with your desired configuration
-const monitor = new WebSocketMonitor();
+const webSocketMonitor = new WebSocketMonitor();
+
+/*
+  Perform your task. Close the webSocketMonitor after your task is completed.
+*/
 
 // Closing the WebSocketMonitor
-process.on('SIGINT', () => {
-  console.log('Received SIGINT (Ctrl+C). Closing WebSocketMonitor.');
-  monitor.close();
-  process.exit(0);
-});
+(async () => {
+  await webSocketMonitor.close();
+})()
 ```
 
 ## Confguration Options

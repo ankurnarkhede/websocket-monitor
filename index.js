@@ -10,28 +10,25 @@ class WebSocketMonitor {
     this.retryCount = 0;
     this.errorTimestamps = [];
     this.connectionActive = true;
+    this.closeCommandReceived = false;
     this.debug = options.debug === true;
 
     this.connect();
 
     // Register exit, SIGINT, and SIGTERM event handlers
-    process.on("exit", () => {
+    process.on("exit", async () => {
       if (this.connectionActive) {
-        this.close();
+        await this.close();
       }
     });
 
-    process.on("SIGINT", () => {
-      console.log("Received SIGINT. Closing WebSocketMonitor.");
-      this.close();
-      process.exit(0);
-    });
-
-    process.on("SIGTERM", () => {
-      console.log("Received SIGTERM. Closing WebSocketMonitor.");
-      this.close();
-      process.exit(0);
-    });
+    ["SIGINT", "SIGTERM", "SIGQUIT"].forEach((signal) =>
+      process.on(signal, async () => {
+        console.log(`Received ${signal}. Closing WebSocketMonitor.`);
+        await this.close();
+        process.exit(0);
+      })
+    );
   }
 
   log(...args) {
@@ -87,7 +84,10 @@ class WebSocketMonitor {
   }
 
   retryConnection() {
-    if (this.retryAttempts === -1 || this.retryCount < this.retryAttempts) {
+    if (
+      (this.retryAttempts === -1 || this.retryCount < this.retryAttempts) &&
+      !this.closeCommandReceived
+    ) {
       this.retryCount++;
       this.log(
         `Retrying connection (${this.retryCount}/${this.retryAttempts})...`
@@ -95,14 +95,19 @@ class WebSocketMonitor {
       this.clearPingInterval();
       this.connect();
     } else {
-      console.error(
-        "Retry attempts exhausted. Unable to establish WebSocket connection."
-      );
+      if (this.retryAttempts === -1 || this.retryCount < this.retryAttempts) {
+        console.error(
+          "Retry attempts exhausted. Unable to establish WebSocket connection."
+        );
+      }
       this.close();
     }
   }
 
-  close() {
+  async close() {
+    // Set closeCommandReceived = true so that any disconnection in the sleep time doesn't reconnect the WS connection.
+    this.closeCommandReceived = true;
+    await sleep(1000);
     this.clearPingInterval();
     this.ws.close();
     this.connectionActive = false;
@@ -113,6 +118,10 @@ class WebSocketMonitor {
       this.errorTimestamps.join(", ")
     );
   }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // Export the class based on the module system (CommonJS or ES Modules)
